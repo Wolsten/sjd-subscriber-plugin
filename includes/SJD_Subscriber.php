@@ -144,7 +144,8 @@ class SJD_Subscriber {
     public static function get( $email ){
         $query = new WP_Query( array(
             'title'=>$email,
-            'post_type'=>self::POST_TYPE
+            'post_type'=>self::POST_TYPE,
+            'post_status' => array('publish', 'draft')
         ));
         if ( $query->have_posts() ){
             $query->the_post();

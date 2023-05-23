@@ -1,5 +1,6 @@
 <?php
 
+
 declare(strict_types=1);
 
 
@@ -7,7 +8,9 @@ class SJD_ShortCode {
 
     public static function init(){
 
-        update_option('subscriber_url', self::get_subscriber_url());
+        $url = self::get_subscriber_url();
+
+        update_option('subscriber_url', $url);
 
         // Handle inputs
         $submit = false;
@@ -29,6 +32,7 @@ class SJD_ShortCode {
                     isset($_REQUEST['email']) ){
 
             $subscriber = self::validate_subscription($_REQUEST);
+
             if( $subscriber ){ 
                 echo "<p>Your subscription was validated! We will let you know when new content 
                          is added to the site.</p>";
@@ -43,12 +47,31 @@ class SJD_ShortCode {
             }
             return;
 
-        // USER UNSUBSCRIBE
+        // USER REQUEST UNSUBSCRIBE
+        // http://test.local/newsletter?unsubscribe&id=3084&email=stephenjohndavison@gmail.com
         } else if ( isset($_REQUEST['unsubscribe']) && 
                     isset($_REQUEST['id']) && 
                     isset($_REQUEST['email']) ){
 
+            $subscriber = self::get_subscriber($_REQUEST);
+            $id = $_REQUEST['id'];
+            $email = $_REQUEST['email'];
+
+            if( $subscriber ){ 
+                echo "<h2>We would be sorry to see you go!</h2>";
+                echo "<p><a href='$url?confirm_unsubscribe&id=$id&email=$email'>Click here to confirm you want to cancel your subscription.</a></p>";
+            } else {
+                echo "<p>We had a problem finding your subscription.</p>";
+            }
+            return;
+
+        // USER CONFIRM UNSUBSCRIBE
+        } else if ( isset($_REQUEST['confirm_unsubscribe']) && 
+                    isset($_REQUEST['id']) && 
+                    isset($_REQUEST['email']) ){
+
             $subscriber = self::unsubscribe($_REQUEST);
+
             if( $subscriber ){ 
                 echo "<h2>We are sorry to see you go!</h2>";
                 echo "<p>Your subscription has been cancelled. 
@@ -196,9 +219,12 @@ class SJD_ShortCode {
             'key' => $request['key'],
             'email' => sanitize_email($request['email'])
         );
+
         // If have values then check against registered subscriber
         if ( $clean['email'] && $clean['key'] ){
+
             $subscriber = SJD_Subscriber::get($clean['email']);
+
             if ( $subscriber ){
                 // Get the validation key form the user meta data
                 // If match then set the user as validated by setting role to subscriber
@@ -215,6 +241,10 @@ class SJD_ShortCode {
         return false;
     }   
 
+    private static function get_subscriber($request){
+        $email = sanitize_email($request['email']);
+        return SJD_Subscriber::get($email);
+    }
 
     private static function unsubscribe($request){
         $clean = array(
