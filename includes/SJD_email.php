@@ -27,6 +27,9 @@ function send_smtp_email( $phpmailer ) {
 	$phpmailer->From       = SMTP_FROM;
 	$phpmailer->Sender     = $phpmailer->From;
 	$phpmailer->FromName   = SMTP_NAME;
+	if( 'text/plain' !== $phpmailer->ContentType && empty( $phpmailer->AltBody ) ) {
+		$phpmailer->AltBody = wp_strip_all_tags( $phpmailer->Body );
+	}
 }
 
 ?>

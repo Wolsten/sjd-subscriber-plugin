@@ -138,9 +138,17 @@ class SJD_Subscriber {
         echo get_post_meta( $post_id, $column_id, $single=true);
     }
 
+    /*
+     * Get the current subscriber by their email. Returns false if not found.
+     */
     public static function get( $email ){
-        $post = get_page_by_title($title=$email,$output='OBJECT',$post_type=self::POST_TYPE);
-        if ( $post ){
+        $query = new WP_Query( array(
+            'title'=>$email,
+            'post_type'=>self::POST_TYPE
+        ));
+        if ( $query->have_posts() ){
+            $query->the_post();
+            $post = get_post();
             // Add meta data to the post object
             $meta = get_post_meta( $post->ID );
             if ( $meta ){
