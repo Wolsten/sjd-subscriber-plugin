@@ -59,7 +59,7 @@ class SJD_ShortCode {
 
             if( $subscriber ){ 
                 echo "<h2>We would be sorry to see you go!</h2>";
-                echo "<p><a href='$url?confirm_unsubscribe&id=$id&email=$email'>Click here to confirm you want to cancel your subscription.</a></p>";
+                echo "<p>If you are sure, please click <a href='$url?confirm_unsubscribe&id=$id&email=$email'>here</a> to confirm you want to cancel your subscription.</p>";
             } else {
                 echo "<p>We had a problem finding your subscription.</p>";
             }
