@@ -1,0 +1,47 @@
+#sjd-subscribe {
+    display: flex;
+    flex-direction: column;
+
+    gap: 1rem;
+}
+
+#sjd-subscribe div.form-field {
+    display: flex;
+    flex-direction: row;
+    width: 360px;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+}
+
+#sjd-subscribe div.form-field.submit {
+    justify-content: flex-end;
+}
+
+#sjd-subscribe label {
+    width: 80px;
+    text-align: right;
+}
+
+#sjd-subscribe input {
+    width: 280px;
+}
+
+#sjd-subscribe input.error {
+    background-color: pink;
+}
+
+#sjd-subscribe div.error {
+    color: red;
+}
+
+#sjd-subscribe button {
+    margin-top: 1rem;
+    display: block;
+    float: right;
+}
+
+.sjd-form-advice {
+    font-style: italic;
+    margin: 0;
+}

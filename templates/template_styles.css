@@ -1,0 +1,86 @@
+body {
+    font-size: 12pt;
+    line-height: 1.5em;
+    color: #333;
+}
+
+header .site-logo {
+    text-align: center;
+}
+
+header .site-logo img {
+    width: 120pt;
+    height: auto;
+}
+
+header img.header-image {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+}
+
+header .site-name {
+    font-size: 20pt;
+    line-height: 30pt;
+    text-align: center;
+    padding: 20pt 10pt;
+    margin: 0;
+    color: $primary_colour;
+    text-transform: uppercase;
+}
+
+footer {
+    margin: 30pt 0 5pt 0;
+    padding: 10pt;
+    border: 1px solid lightgrey;
+    color: #555;
+    font-size: 11pt;
+}
+
+h1,
+h2,
+h3 {
+    padding: 10pt 0 5pt 0;
+    margin: 0;
+    line-height: 1.5em;
+    color: $primary_colour;
+}
+
+h1 {
+    text-align: center;
+}
+
+h1 a {
+    text-decoration: none;
+    color: $primary_colour;
+}
+
+p {
+    padding: 0 0 5pt 0;
+    margin: 0;
+}
+
+p.salutation {
+    margin-top: 10pt;
+}
+
+p.excerpt {
+    padding: 10pt 20pt;
+    margin: 20pt 0;
+    background-color: $primary_colour;
+    color: $excerpt_font_colour;
+}
+
+p.signature {
+    padding: 10pt 0 0 0;
+}
+
+blockquote {
+    font-style: italic;
+    margin: 20pt 0 0 0;
+    padding: 10pt 20pt;
+}
+
+h3.share {
+    margin-top: 20pt;
+}

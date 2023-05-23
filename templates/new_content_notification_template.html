@@ -1,0 +1,42 @@
+<!doctype html>
+
+<html xmlns='http://www.w3.org/1999/xhtml' xmlns:v='urn:schemas-microsoft-com:vml'
+    xmlns:o='urn:schemas-microsoft-com:office:office'>
+
+<head>
+    <meta charset='UTF-8'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <meta name='viewport' content='width=device-width, initial-scale=1'>
+    <title>$name</title>
+    $style
+</head>
+
+<body>
+
+    <header>
+        $logo
+        <div class='site-name'>$name</div>
+        <img class='header-image' src='$img' />
+    </header>
+
+    <p class='salutation'>Hi $first_name,</p>
+
+    $message
+
+    <p class='signature'>
+        Best wishes<br>From the team at $from
+    </p>
+
+    <footer>
+        <p>If you enjoy reading this, please do share with others. New visitors can <a href='$subscriber_url'>click
+                here</a> to
+            subscribe to our newsletter. $contact_email $twitter
+        </p>
+        <p>
+            To unsubscribe and stop receiving emails from us please <a
+                href='$subscriber_url?unsubscribe&id=$subscriber_id&email=$subscriber_email'>click here</a>.
+        </p>
+    </footer>
+</body>
+
+</html>
