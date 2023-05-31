@@ -44,7 +44,7 @@ class SJD_Subscriber {
         register_post_type(self::POST_TYPE, array(
             'label' => ucfirst(self::POST_TYPE),
             'singular_label' => ucfirst(self::POST_PREFIX),
-            'public' => true,
+            'public' => false,
             'show_ui' => true, // UI in admin panel
             'show_in_menu' => true,
             'menu_icon' => 'dashicons-share',
@@ -145,7 +145,7 @@ class SJD_Subscriber {
         $query = new WP_Query( array(
             'title'=>$email,
             'post_type'=>self::POST_TYPE,
-            'post_status' => array('publish', 'draft')
+            'post_status' => array('publish', 'draft', 'private')
         ));
         if ( $query->have_posts() ){
             $query->the_post();
@@ -207,7 +207,7 @@ class SJD_Subscriber {
             // echo "<p>wp_update_post for post id $post_id:</p>";
             $status = wp_update_post( array(
                 'ID'=>$post_id, 
-                'post_status'=>'publish'
+                'post_status'=>'private'
             ));
             if ( is_wp_error($status) ){
                 return false;
@@ -221,7 +221,7 @@ class SJD_Subscriber {
         $subscribers = get_posts(array(
             'numberposts' => -1,
             'post_type' => self::POST_TYPE,
-            'post_status' => 'publish'
+            'post_status' => 'private'
         ));
         foreach( $subscribers as $subscriber ){
             $subscriber->first_name = get_post_meta( $subscriber->ID, self::POST_PREFIX.'_first_name', $single=true);
