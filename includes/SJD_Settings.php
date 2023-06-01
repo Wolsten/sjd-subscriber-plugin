@@ -65,6 +65,12 @@ class SJD_Settings {
         $contact_email = get_option('contact_email');
         $subscriber_location = get_option('subscriber_location');
 
+        print_r($_POST);
+
+        if( isset($_POST['Export subscribers'])){
+            echo "<p>Export subscribers</p>";
+        }
+
         if ( isset($_POST['subscriber_stop_on_first_fail']) ){
             $subscriber_stop_on_first_fail = $_POST['subscriber_stop_on_first_fail'] == '1';
             update_option('subscriber_stop_on_first_fail', $subscriber_stop_on_first_fail);
@@ -168,8 +174,7 @@ class SJD_Settings {
                     <input type="text" name="subscriber_email_excerpt_font_colour" value="<?=$subscriber_email_excerpt_font_colour?>"/>
                 </p>
 
-                <p>Choose a font colour for post excerpts</p>
-                @todo Something
+                <!-- @todo <p>Choose a font colour for post excerpts</p> -->
 
                 <!-- ADDITIONAL DATA COLLECTION SETTINGS -->
                 <h2>Additional data collection settings</h2>
@@ -193,6 +198,12 @@ class SJD_Settings {
                 <p>
                     <input type="submit" value="Save Changes"/>
                 </p>
+
+                <!-- IMPORT/EXPORT 
+                <h2>Import/Export</h2>
+                <p>
+                    <input type="submit" value="Export subscribers"/>
+                 </p> -->
             </form>
 
 

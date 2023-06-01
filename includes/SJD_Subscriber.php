@@ -10,7 +10,6 @@ and then choose Tools -> Import -> Import CSV
 The CSV file must have the following headings on the first row:
 
 post_title  Subscribers email address
-subscriber_email Should be the same as post title
 subscriber_first_name First name
 subscriber_last_name Last name
 post_type Must be set to "subscribers"
@@ -230,7 +229,7 @@ class SJD_Subscriber {
         $subscribers = get_posts(array(
             'numberposts' => -1,
             'post_type' => self::POST_TYPE,
-            'post_status' => 'private'
+            'post_status' => array('publish', 'draft', 'private')
         ));
         foreach( $subscribers as $subscriber ){
             $subscriber->first_name = get_post_meta( $subscriber->ID, self::POST_PREFIX.'_first_name', $single=true);
@@ -296,16 +295,27 @@ class SJD_Subscriber {
         fclose($handle);
     }
 
+    // The file will be created in the wp-admin folder
+    private static function download_filename() { return "downloaded_subscribers.csv"; }
+
     public static function export_subscribers(){
+
+        $download_filename = self::download_filename();
+
+        // echo "<p>$download_filename</p>";
+
         $subscribers = get_posts(array(
             'numberposts' => -1,
-            'post_type' => self::POST_TYPE
+            'post_type' => self::POST_TYPE,
+            'post_status' => array('publish', 'draft', 'private')
         ));
+
         if ( $subscribers ){
 
-            $handle = fopen("downloaded_subscribers.csv", "w") or die("Unable to open file for writing!");
+            $handle = fopen($download_filename, "w") or die("Unable to open file for writing!");
 
-            $title = "email,first_name,last_name,validation_key\n";
+            $title = "email,first_name,last_name,location,validation_key\n";
+            // echo "<p>$title</p>";
             fwrite($handle,$title);
 
             foreach( $subscribers as $subscriber){
@@ -313,19 +323,28 @@ class SJD_Subscriber {
                 $first_name = get_post_meta( $subscriber->ID, self::POST_PREFIX.'_first_name', $single=true);
                 $last_name = get_post_meta( $subscriber->ID, self::POST_PREFIX.'_last_name', $single=true);
                 $location = get_post_meta( $subscriber->ID, self::POST_PREFIX.'_location', $single=true);
+                if ( $location == '' ) $location = "-";
                 $validation_key = get_post_meta( $subscriber->ID, self::POST_PREFIX.'_validation_key', $single=true);
-
-                $line = "$email,$first_name,$last_name,$locations,$validation_key\n";
+                if ( $validation_key == '' ) $validation_key = "-";
+                $line = "$email,$first_name,$last_name,$location,$validation_key\n";
+                // echo "<p>$line</p>";
                 fwrite($handle,$line);
             }
 
             $domain = get_bloginfo('url');
             echo "<p>Exported subscribers - click the following link below to download:</p>";
-            echo "<a href='$domain/downloaded_subscribers.csv' download>Download file</a>";
+            echo "<p><a href='$domain/wp-admin/$download_filename' download>Download file</a></p>";
 
             fclose($handle);
         }
+    }
 
+    public static function remove_download_file(){
+        return unlink(self::download_filename());
+    }
+
+    public static function download_file_exists(){
+        return file_exists(self::download_filename());
     }
 
 }
