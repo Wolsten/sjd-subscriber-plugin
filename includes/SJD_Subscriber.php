@@ -32,6 +32,8 @@ class SJD_Subscriber {
     public const POST_TYPE = 'subscribers'; // Custom post type
     public const POST_PREFIX = 'subscriber';  // Prefix for custom fields
 
+    // Declare the custom fields. Email is stored as the post_title, NOT as a custom field
+    // Must declare field to support validation
     public const CUSTOM_FIELDS = array(
         array("name"=>"first_name", "title"=>"First name", "type"=>"text", "required"=>true),
         array("name"=>"last_name", "title"=>"Last name", "type"=>"text", "required"=>true),
@@ -59,18 +61,21 @@ class SJD_Subscriber {
         add_filter('manage_posts_custom_column',  'SJD_Subscriber::admin_column', 10, 2);
     }
 
+    // Add edit boxes for custom data to the subscriber post type
     public static function add_meta_boxes($post_type){
         if ( $post_type==self::POST_TYPE ) {
             foreach( self::CUSTOM_FIELDS as $field ){
-                add_meta_box(
-                    $html_id=self::POST_PREFIX.'_'.$field['name'],
-                    $title=$field['title'],
-                    $display_callback=Array('SJD_Subscriber','display_meta_box'),
-                    $screen=null, 
-                    $context='normal', 
-                    $priority='high',
-                    $callback_args=array( $field )
-                );
+                if ( $field['name'] !== 'email' ){
+                    add_meta_box(
+                        $html_id=self::POST_PREFIX.'_'.$field['name'],
+                        $title=$field['title'],
+                        $display_callback=Array('SJD_Subscriber','display_meta_box'),
+                        $screen=null, 
+                        $context='normal', 
+                        $priority='high',
+                        $callback_args=array( $field )
+                    );
+                }
             }
         }
     }
@@ -126,6 +131,7 @@ class SJD_Subscriber {
     public static function admin_columns($columns){
         unset($columns['date']);
         foreach( self::CUSTOM_FIELDS as $field ){
+            // Ignore email
             if ( $field['name'] !== 'email'){
                 $columns[self::POST_PREFIX.'_'.$field['name']] = $field['title'];
             }
@@ -164,6 +170,7 @@ class SJD_Subscriber {
     }
 
     public static function create( $fields ){
+        // Create new subscriber with post_title set to email
         $new_subscriber = array(
             'post_title' => $fields['email'],
             'post_status' => 'draft',
@@ -174,16 +181,19 @@ class SJD_Subscriber {
         $success = true;
         $validation_key = '';
         if ( $post_id > 0 ){
+
             foreach( self::CUSTOM_FIELDS as $field ){
-                if ( $field['name'] == 'validation_key' ){
-                    $validation_key = self::random_string(32);
-                    $value = $validation_key;
-                } else {
-                    $value = $fields[$field['name']];
-                }
-                $meta_id = update_post_meta($post_id, self::POST_PREFIX.'_'.$field['name'], $value, $unique=true);
-                if ( $meta_id === false ){
-                    $success = false;
+                if ( $field['name'] !== 'email' ){
+                    if ( $field['name'] == 'validation_key' ){
+                        $validation_key = self::random_string(32);
+                        $value = $validation_key;
+                    } else {
+                        $value = $fields[$field['name']];
+                    }
+                    $meta_id = update_post_meta($post_id, self::POST_PREFIX.'_'.$field['name'], $value, $unique=true);
+                    if ( $meta_id === false ){
+                        $success = false;
+                    }
                 }
             }
         }
@@ -191,7 +201,6 @@ class SJD_Subscriber {
             $new_subscriber['ID'] = $post_id;
             $new_subscriber['first_name'] = $fields['first_name'];
             $new_subscriber['last_name'] = $fields['last_name'];
-            $new_subscriber['email'] = $fields['email'];
             $new_subscriber['location'] = $fields['location'];
             $new_subscriber['validation_key'] = $validation_key;
             return (object) $new_subscriber;
@@ -276,7 +285,6 @@ class SJD_Subscriber {
                 );
                 $post_id = wp_insert_post($newSubscriber);
                 if ( $post_id ){
-                    $meta_id = update_post_meta($post_id, self::POST_PREFIX.'_email', $email, $unique=true);
                     $meta_id = update_post_meta($post_id, self::POST_PREFIX.'_first_name', $first_name, $unique=true);
                     $meta_id = update_post_meta($post_id, self::POST_PREFIX.'_last_name', $last_name, $unique=true);
                     $meta_id = update_post_meta($post_id, self::POST_PREFIX.'_location', $location, $unique=true);
@@ -301,7 +309,7 @@ class SJD_Subscriber {
             fwrite($handle,$title);
 
             foreach( $subscribers as $subscriber){
-                $email = get_post_meta( $subscriber->ID, self::POST_PREFIX.'_email', $single=true);
+                $email = $subscriber->post_title;
                 $first_name = get_post_meta( $subscriber->ID, self::POST_PREFIX.'_first_name', $single=true);
                 $last_name = get_post_meta( $subscriber->ID, self::POST_PREFIX.'_last_name', $single=true);
                 $location = get_post_meta( $subscriber->ID, self::POST_PREFIX.'_location', $single=true);

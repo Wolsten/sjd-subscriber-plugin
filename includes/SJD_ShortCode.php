@@ -19,8 +19,8 @@ class SJD_ShortCode {
             // Check the nonce;
             if ( !isset($_POST['_sjd_subscribe_nonce']) ||
                  wp_verify_nonce( $_POST['_sjd_subscribe_nonce'], 'sjd_subscribe_submit' ) !== 1) {
-                echo "<p>Whoops - something went wrong. Please try again but if this problem 
-                         persists please let us know.</p>";
+                echo "<h2>Whoops - something went wrong</h2>
+                      <p>Please try again but if this problem persists please let us know.</p>";
                 return;
             }
 
@@ -34,12 +34,12 @@ class SJD_ShortCode {
             $subscriber = self::validate_subscription($_REQUEST);
 
             if( $subscriber ){ 
-                echo "<p>Your subscription was validated! We will let you know when new content 
-                         is added to the site.</p>";
+                echo "<h2>Your subscription was validated!</h2>
+                      <p>We will let you know when new content is added to the site.</p>";
                 SJD_Notifications::send_new_subscriber_email($subscriber);
             } else {
-                echo "<p>We had a problem validating your subscription. 
-                         It is possible that the validation link in your email was split 
+                echo "<h2>We had a problem validating your subscription</h2>
+                         <p>It is possible that the validation link in your email was split 
                          across multiple lines. If this is the case, please copy and paste into
                          notepad or other plain text editor, remove the line break and then 
                          copy and paste the full url into the browser address bar and then
@@ -61,7 +61,8 @@ class SJD_ShortCode {
                 echo "<h2>We would be sorry to see you go!</h2>";
                 echo "<p>If you are sure, please click <a href='$url?confirm_unsubscribe&id=$id&email=$email'>here</a> to confirm you want to cancel your subscription.</p>";
             } else {
-                echo "<p>We had a problem finding your subscription.</p>";
+                echo "<h2>We had a problem finding your subscription</h2>
+                      <p>Are you sure that you haven't already unsubscribed with this email?</p>";
             }
             return;
 
@@ -80,7 +81,8 @@ class SJD_ShortCode {
                          subscribe again at any time.</p>";
                 SJD_Notifications::send_cancelled_subscriber_email($subscriber);
             } else {
-                echo "<p>We had a problem cancelling your subscription.</p>";
+                echo "<h2>We had a problem cancelling your subscription</h2>
+                      <p>Are you sure that you haven't already unsubscribed with this email?</p>";
             }
             return;
         }
@@ -191,13 +193,13 @@ class SJD_ShortCode {
     static function confirmation($subscriber){ 
         $status = SJD_Notifications::send_subscribe_email(
             $subscriber->ID, 
-            $subscriber->first_name, 
-            $subscriber->email, 
+            $subscriber->first_name,
+            $subscriber->post_title, // This is their email
             $subscriber->validation_key
         );
         if ( !is_wp_error( $status) ){
             echo "<h2>Nearly there $subscriber->first_name!</h2>";
-            echo "<p>We've sent you an email to $subscriber->email - please click on the link inside to confirm your subscription.</p>";
+            echo "<p>We've sent you an email to $subscriber->post_title - please click on the link inside to confirm your subscription.</p>";
             echo "<p>If you don't receive the message in the next few minutes please check your spam folder.</p>";
             $send_email = str_replace('@', ' AT ', SMTP_USER);
             echo "<p>You can help by adding the email address <strong>'$send_email'</strong> to your address book. Replace the ' AT ' with the usual '@'.</p>";
