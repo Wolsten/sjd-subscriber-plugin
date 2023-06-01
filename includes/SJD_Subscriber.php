@@ -314,7 +314,7 @@ class SJD_Subscriber {
 
             $handle = fopen($download_filename, "w") or die("Unable to open file for writing!");
 
-            $title = "email,first_name,last_name,location,validation_key\n";
+            $title = "email|first_name|last_name|location|validation_key\n";
             // echo "<p>$title</p>";
             fwrite($handle,$title);
 
@@ -326,7 +326,7 @@ class SJD_Subscriber {
                 if ( $location == '' ) $location = "-";
                 $validation_key = get_post_meta( $subscriber->ID, self::POST_PREFIX.'_validation_key', $single=true);
                 if ( $validation_key == '' ) $validation_key = "-";
-                $line = "$email,$first_name,$last_name,$location,$validation_key\n";
+                $line = "$email|$first_name|$last_name|$location|$validation_key\n";
                 // echo "<p>$line</p>";
                 fwrite($handle,$line);
             }
