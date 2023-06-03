@@ -19,10 +19,6 @@ REQUIRE_ONCE (SJD_SUBSCRIBE_PLUGIN_PATH . 'includes/SJD_Notifications.php');
 REQUIRE_ONCE (SJD_SUBSCRIBE_PLUGIN_PATH . 'includes/SJD_Settings.php');
 
 
-
-
-
-
 add_action( 'init', 'sjd_subscribe_init');
 function sjd_subscribe_init(){
     wp_enqueue_style('sjd_subscribe_form', plugins_url("styles.css", __FILE__), [], SJD_SUBSCRIBE_VERSION);
@@ -39,9 +35,7 @@ function sjd_subscriber_tools_admin_menu(){
 }
 function sjd_subscriber_tools_do_page(){ ?>
     <style>
-        h3 {
-            margin-top:2rem;
-        }
+        h3 { margin-top:2rem }
     </style>
     <h2>Manage subscribers</h2>
     <h3>Export CSV file</h3>
