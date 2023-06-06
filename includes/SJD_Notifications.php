@@ -129,7 +129,7 @@ class SJD_Notifications {
         $html = str_replace( '$logo', self::logo(), $html);
         $html = str_replace( '$subscriber_first_name', $subscriber->first_name, $html);
         $html = str_replace( '$subscriber_last_name', $subscriber->last_name, $html);
-        $html = str_replace( '$subscriber_email', $subscriber->email, $html);
+        $html = str_replace( '$subscriber_email', $subscriber->post_title, $html);
         $html = str_replace( '$subscriber_location', $subscriber->location ? $subscriber->location : 'UNSPECIFIED', $html);
 
         $html = str_replace( '$domain', get_bloginfo('url'), $html);
@@ -153,7 +153,7 @@ class SJD_Notifications {
         $html = str_replace( '$logo', self::logo(), $html);
         $html = str_replace( '$subscriber_first_name', $subscriber->first_name, $html);
         $html = str_replace( '$subscriber_last_name', $subscriber->last_name, $html);
-        $html = str_replace( '$subscriber_email', $subscriber->email, $html);
+        $html = str_replace( '$subscriber_email', $subscriber->post_title, $html);
         $html = str_replace( '$subscriber_location', $subscriber->location ? $subscriber->location : 'UNSPECIFIED', $html);
 
         $html = str_replace( '$domain', get_bloginfo('url'), $html);
