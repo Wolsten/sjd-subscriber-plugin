@@ -181,13 +181,14 @@ class SJD_Notifications {
         $from = get_bloginfo('name');
         $name = $post->post_title;
         $domain = get_bloginfo('url');
+        $url = "$domain/$post->post_name";
         if ( $what === 'PAGE' ){
             $content = self::format($post->post_content);
             $message ="<p class='excerpt'>$post->post_excerpt</p>$content";
         } else {
             $message = 
                 "<p>$post->post_excerpt</p>
-                 <p><a href='$domain/$post->post_name'>Click here to find out more</a>.</p>";
+                 <p><a href='$url'>Click here to find out more</a>.</p>";
         }
 
         $html = file_get_contents(  SJD_SUBSCRIBE_TEMPLATES_PATH . 'new_content_notification_template.html' );
@@ -200,6 +201,7 @@ class SJD_Notifications {
         $html = str_replace( '$message', $message, $html);
         $html = str_replace( '$twitter', self::twitter(), $html);
         $html = str_replace( '$contact_email',self::contact_email(), $html);
+        $html = str_replace( '$url',$url, $html);
 
         return $html;
     }

@@ -65,7 +65,7 @@ class SJD_Settings {
         $contact_email = get_option('contact_email');
         $subscriber_location = get_option('subscriber_location');
 
-        print_r($_POST);
+        // print_r($_POST);
 
         if( isset($_POST['Export subscribers'])){
             echo "<p>Export subscribers</p>";
@@ -149,7 +149,7 @@ class SJD_Settings {
                 <!-- CONTENT SETTINGS -->
                 <h2>Email content settings</h2>
 
-                <p>Choose which email to provide for contact. If none specified it is assumed that this will not be displayed to the visitor.</p>
+                <p>Choose which email to provide for contact. If none specified it is assumed that this will not be displayed to the subscriber.</p>
                 <p>
                     <label for="contact_email">Contact email</label>
                     <input type="text" name="contact_email" value="<?=$contact_email?>"/>
