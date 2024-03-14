@@ -106,8 +106,8 @@ class SJD_ShortCode {
 
         $clean = array( "first_name"=>"", "last_name"=>"", "email"=>"" );
         $errors = array( "first_name"=>"", "last_name"=>"", "email"=>"" );
-        $clean = array( "first_name"=>"Steve", "last_name"=>"Davison", "email"=>"stephenjohndavison@gmail.com" );
-        $errors = array( "first_name"=>"", "last_name"=>"", "email"=>"" );
+        // $clean = array( "first_name"=>"Steve", "last_name"=>"Davison", "email"=>"stephenjohndavison@gmail.com" );
+        // $errors = array( "first_name"=>"", "last_name"=>"", "email"=>"" );
 
         $location = get_option("subscriber_location");
         if ( $location ){

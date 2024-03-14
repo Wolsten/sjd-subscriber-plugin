@@ -1,5 +1,9 @@
 #sjd-subscribe {
 
+    --warning-colour-background: hsl(0, 31%, 90%);
+    --warning-colour-text: hsl(0, 31%, 50%);
+    --button-colour-background: hsl(118, 39%, 85%);
+
     display: flex;
     flex-direction: column;
     gap: 1rem;
@@ -26,25 +30,28 @@
         height: 2rem;
         padding:0.2rem 0.4rem;
         font-size: 1rem;
+        border:none;
     }
     
     & input.error {
-        background-color: pink;
+        background-color: var(--warning-colour-background);
     }
 
     .form-field.error {
-        color: red;
+        color: var(--warning-colour-text);
         margin-bottom:1rem;
     }
 
     & button {
         height: 2rem;
-        padding:0.2rem 0.4rem;
+        padding:0.2rem 0.6rem;
         font-size: 1rem;
         margin-top: 1rem;
         display: block;
         float: right;
         cursor: pointer;
+        border:none;
+        background-color: var(--button-colour-background);
     }
 
     .sjd-form-advice {
