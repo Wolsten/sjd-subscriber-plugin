@@ -8,12 +8,25 @@
  * For instructions on the use of this script, see:
  * https://butlerblog.com/easy-smtp-email-wordpress-wp_mail/
  * 
+ * !!! IMPORTANT !!!
  * Values for constants should be set in wp-config.php
  */
 
-if ( defined('SMTP_USER') == false || defined('SMTP_PASS') == false){
-	die( "sjd_subscribe plugin not configured. Set SMTP constants in wp-config.php");
+
+if ( defined('SMTP_USER') == false || defined('SMTP_PASS') == false || defined('SMTP_FROM') == false){
+	die("<p>sjd_subscribe plugin not configured. Set SMTP constants in wp-config.php</p>");
 }
+
+add_filter( 'wp_mail_from', 'custom_wp_mail_from' );
+function custom_wp_mail_from( $original_email_address ) {
+	return SMTP_FROM;
+}
+
+add_filter( 'wp_mail_from_name', 'custom_wp_mail_from_name' );
+function custom_wp_mail_from_name( $original_email_from ) {
+	return SMTP_NAME;
+}
+
 
 add_action( 'phpmailer_init', 'send_smtp_email' );
 function send_smtp_email( $phpmailer ) {

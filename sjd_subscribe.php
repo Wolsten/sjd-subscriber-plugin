@@ -1,14 +1,14 @@
 <?php
 /**
  * Plugin Name: SJD Subscribe
- * Version: 0.0.9
+ * Version: 0.0.10
  * Author: Steve Davison
  * Description: Provide simple subscription solution to register subscribers and manage 
  * email notifications for when new content is added
  */
 
-DEFINE( "SJD_SUBSCRIBE_VERSION", '0.0.9');
-DEFINE( "SJD_SUBSCRIBE_IMAGE", plugins_url('sjd_subscribe_plugin/images/email.jpg'));
+DEFINE( "SJD_SUBSCRIBE_VERSION", '0.0.10');
+DEFINE( "SJD_SUBSCRIBE_IMAGE", plugins_url('/sjd-subscriber-plugin/images/email.jpg'));
 DEFINE( 'SJD_SUBSCRIBE_PLUGIN_PATH', plugin_dir_path( __FILE__ ) );
 DEFINE( 'SJD_SUBSCRIBE_TEMPLATES_PATH', SJD_SUBSCRIBE_PLUGIN_PATH . 'templates/' );
 
@@ -17,7 +17,6 @@ REQUIRE_ONCE (SJD_SUBSCRIBE_PLUGIN_PATH . 'includes/SJD_ShortCode.php');
 REQUIRE_ONCE (SJD_SUBSCRIBE_PLUGIN_PATH . 'includes/SJD_Subscriber.php');
 REQUIRE_ONCE (SJD_SUBSCRIBE_PLUGIN_PATH . 'includes/SJD_Notifications.php');
 REQUIRE_ONCE (SJD_SUBSCRIBE_PLUGIN_PATH . 'includes/SJD_Settings.php');
-
 
 add_action( 'init', 'sjd_subscribe_init');
 function sjd_subscribe_init(){
@@ -28,8 +27,8 @@ function sjd_subscribe_init(){
 }
 
 
-// Add Subscriber Tools menu to the standard admin Tools menu
-add_action( 'admin_menu', 'sjd_subscriber_tools_admin_menu' );
+//Add Subscriber Tools menu to the standard admin Tools menu
+// add_action( 'admin_menu', 'sjd_subscriber_tools_admin_menu' );
 function sjd_subscriber_tools_admin_menu(){
     add_management_page( 'Subscriber Tools', 'Subscriber Tools', 'administrator', 'sjd_subscriber_tools', 'sjd_subscriber_tools_do_page' );
 }
@@ -66,16 +65,17 @@ function sjd_subscriber_tools_do_page(){ ?>
 
 
 // Add send notifications button to post edit pages
-add_action('post_submitbox_start','sjd_post_notify_button');
+//add_action('post_submitbox_start','sjd_post_notify_button');
 function sjd_post_notify_button(){
+
     // Check for subscriber url
     $subscriber_url = get_option('subscriber_url');
     if ( $subscriber_url == '' ){ ?>
-        <div style="margin-bottom:0.5rem;padding:0.5rem;background-color:red;color:white;">
-            <p>You must add the sjd_subscribe_form shortcode to a post or page and view that page before you can begin sending notifications.</p>
-        </div>
-        <?php return;
-    }
+         <div style="margin-bottom:0.5rem;padding:0.5rem;background-color:red;color:white;">
+             <p>You must add the sjd_subscribe_form shortcode to a post or page and view that page before you can begin sending notifications.</p>
+         </div>
+         <?php return;
+     }
     // Add notification functionality to the meta publish box
     global $post;
     if ( $post->post_status !== 'publish' ) return;
@@ -111,7 +111,7 @@ function sjd_post_notify_button(){
 
 
 // On post save check for sending notifications
-add_action('save_post', 'sjd_post_notify_subscribers');
+// add_action('save_post', 'sjd_post_notify_subscribers');
 function sjd_post_notify_subscribers(){
     global $post;
         if ( $post ) {

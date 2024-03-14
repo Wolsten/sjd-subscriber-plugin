@@ -3,14 +3,11 @@
 
 declare(strict_types=1);
 
-define( 'NONCE_NAME','_sjd_subscribe_nonce');
-
 
 class SJD_ShortCode {
 
     public static function init(){
 
-        $html = '';
         
         $url = self::get_subscriber_url();
         
@@ -21,11 +18,11 @@ class SJD_ShortCode {
         
         if ( isset($_POST['SUBMIT']) ) {
             // Check the nonce;
-            
-            if ( wp_verify_nonce( $_POST[NONCE_NAME], 'sjd_subscribe_submit' ) !== 1) {
-                $nonce = $_POST[NONCE_NAME];
-                $html .= "<h2>Whoops - something went wrong</h2>
-                          <p>Please try again but if this problem persists please let us know. Nonce = $nonce</p>";
+            if ( !isset($_POST['_sjd_subscribe_nonce']) ||
+                 wp_verify_nonce( $_POST['_sjd_subscribe_nonce'], 'sjd_subscribe_submit' ) !== 1) {
+                echo "<h2>Whoops - something went wrong</h2>
+                      <p>Please try again but if this problem persists please let us know.</p>";
+                return;
             }
 
             $submit = $_POST['SUBMIT'];
@@ -38,22 +35,21 @@ class SJD_ShortCode {
             $subscriber = self::validate_subscription($_REQUEST);
 
             if( $subscriber ){ 
+                echo "<h2>Your subscription was validated!</h2>
+                      <p>We will let you know when new content is added to the site.</p>";
                 SJD_Notifications::send_new_subscriber_email($subscriber);
-                return "<h2>Your subscription was validated!</h2>
-                          <p>We will let you know when new content is added to the site.</p>";
-                
-
             } else {
-                return "<h2>We had a problem validating your subscription</h2>
+                echo "<h2>We had a problem validating your subscription</h2>
                          <p>It is possible that the validation link in your email was split 
                          across multiple lines. If this is the case, please copy and paste into
                          notepad or other plain text editor, remove the line break and then 
                          copy and paste the full url into the browser address bar and then
                          press enter.</p>";
             }
+            return;
 
         // USER REQUEST UNSUBSCRIBE
-        // http://localhost/newsletter/?unsubscribe&id=3084&email=stephenjohndavison@gmail.com
+        // http://test.local/newsletter?unsubscribe&id=3084&email=stephenjohndavison@gmail.com
         } else if ( isset($_REQUEST['unsubscribe']) && 
                     isset($_REQUEST['id']) && 
                     isset($_REQUEST['email']) ){
@@ -63,12 +59,13 @@ class SJD_ShortCode {
             $email = $_REQUEST['email'];
 
             if( $subscriber ){ 
-                return "<h2>We would be sorry to see you go!</h2>
-                        <p>If you are sure, please click <a href='$url?confirm_unsubscribe&id=$id&email=$email'>here</a> to confirm you want to cancel your subscription.</p>";
+                echo "<h2>We would be sorry to see you go!</h2>";
+                echo "<p>If you are sure, please click <a href='$url?confirm_unsubscribe&id=$id&email=$email'>here</a> to confirm you want to cancel your subscription.</p>";
             } else {
-                return "<h2>We had a problem finding your subscription</h2>
-                        <p>Are you sure that you haven't already unsubscribed with this email?</p>";
+                echo "<h2>We had a problem finding your subscription</h2>
+                      <p>Are you sure that you haven't already unsubscribed with this email?</p>";
             }
+            return;
 
         // USER CONFIRM UNSUBSCRIBE
         } else if ( isset($_REQUEST['confirm_unsubscribe']) && 
@@ -78,19 +75,20 @@ class SJD_ShortCode {
             $subscriber = self::unsubscribe($_REQUEST);
 
             if( $subscriber ){ 
-                return "<h2>We are sorry to see you go!</h2>
-                        <p>Your subscription has been cancelled. 
+                echo "<h2>We are sorry to see you go!</h2>";
+                echo "<p>Your subscription has been cancelled. 
                          You will no longer receive emails notifications 
                          when new content is added to the site. You may 
                          subscribe again at any time.</p>";
                 SJD_Notifications::send_cancelled_subscriber_email($subscriber);
             } else {
-                return "<h2>We had a problem cancelling your subscription</h2>
-                        <p>Are you sure that you haven't already unsubscribed with this email?</p>";
+                echo "<h2>We had a problem cancelling your subscription</h2>
+                      <p>Are you sure that you haven't already unsubscribed with this email?</p>";
             }
+            return;
         }
 
-        return $html . self::user_form($submit);
+        $subscriber = self::user_form($submit);
     }
 
 
@@ -101,22 +99,19 @@ class SJD_ShortCode {
         return "$domain/$post->post_name";
     }
 
-
     private static function user_form( $submitted ){ 
-
+        // $clean = array( "first_name"=>"Steve", "last_name"=>"Davison", "email"=>"stephenjohndavison@gmail.com" );
+        // $errors = array( "first_name"=>"", "last_name"=>"", "email"=>"" );
+        $location = get_option("subscriber_location");
         $clean = array( "first_name"=>"", "last_name"=>"", "email"=>"" );
         $errors = array( "first_name"=>"", "last_name"=>"", "email"=>"" );
-        $clean = array( "first_name"=>"Steve", "last_name"=>"Davison", "email"=>"stephenjohndavison@gmail.com" );
-        $errors = array( "first_name"=>"", "last_name"=>"", "email"=>"" );
-
-        $location = get_option("subscriber_location");
         if ( $location ){
             $clean['location'] = "";
             $errors['location'] = "";
         } 
         $resend = false;
         $error = '';
-        
+
         if ( $submitted ){
 
             $results = SJD_Subscriber::validate_fields($_POST);
@@ -153,56 +148,47 @@ class SJD_ShortCode {
                 }
 
                 if ( ($error=='' && $subscriber) || $submitted == "RESEND"){
-                    return self::confirmation( $subscriber );
+                    self::confirmation( $subscriber );
+                    return;
                 }
             }
 
-        } // End Submitted
+        } ?>
 
-        $loc = $location ? ' (apart from location)' : '';
-        $html = "<p>Enter details below and then click Register. All fields are required$loc.</p>
-                 <form id='sjd-subscribe' method='post'>";
+        <p>Enter details below and then click Register. All fields are required<?= $location?" (apart from location)":""?>.</p>
+        <form id="sjd-subscribe" method="post">
+            <?php foreach( $clean as $key => $value) { 
+                $label = str_replace('_',' ',$key);
+                $type = $key=='email' ? 'email' : 'text'; ?>
 
-        foreach( $clean as $key => $value) { 
-            $label = str_replace('_',' ',$key);
-            $type = $key=='email' ? 'email' : 'text';
+                <?php if ( $location && $key === 'location' ) { ?>
+                    <p class="sjd-form-advice">If you want to be put in touch with like minded people in your area please provide a location to whatever level of detail you feel comfortable with, e.g. North West England or Liverpool.</p>
+                <?php } ?>
 
-            if ( $location && $key === 'location' ) {
-                $html .= "<p class='sjd-form-advice'>If you want to be put in touch with like minded people in your area please provide a location to whatever level of detail you feel comfortable with, e.g. North West England or Liverpool.</p>";
-            }
+                <div class="form-field">
+                    <label for="<?= $key ?>"><?= $label ?></label>
+                    <input type="<?=$type?>" name="<?=$key?>" value="<?=$value?>" class="<?=$errors[$key]?'error':'';?>"/>
+                </div>
+                <?php if ( $errors[$key] ) { ?>
+                    <div class="form-field error"><?= $errors[$key] ?></div>
+                <?php } ?>
+            <?php } ?>
+            <?php if ( $error ) { ?>
+                <div class="form-field error"><?= $error ?></div>
+            <?php } ?>
+            <div class="form-field submit">
+                <?php if ( $resend ){ ?>
+                    <button type="submit" name="SUBMIT" value="RESEND" style="margin-right:1rem;">Resend</button>  
+                <?php } ?>
+                <button type="submit" name="SUBMIT" value="REGISTER">Register</button>
+            </div>           
+            <?php wp_nonce_field('sjd_subscribe_submit','_sjd_subscribe_nonce'); ?>      
+        </form>
 
-            $errorString = $errors[$key] ? 'error' : '';
-            $html .= "
-                <div class='form-field'>
-                    <label for='$key'>$label</label>
-                    <input type='$type' name='$key' value='$value' class='$errorString'/>
-                </div>";
+        <h2>We respect your privacy</h2>
+        <p>Please note that as per our privacy policy your data will NOT be shared with or sold to third-parties and will be used solely to keep you up to data with our news.</p>
 
-            if ( $errors[$key] ) {
-                $html .= "<div class='form-field error'>$errors[$key]</div>";
-            } 
-        }
-
-        if ( $error ) { 
-            $html .= "<div class='form-field error'>$error</div>";
-        }
-        $html .= "
-            <div class='form-field submit'>";
-
-        if ( $resend ){
-            $html .= "<button type='submit' name='SUBMIT' value='RESEND' style='margin-right:1rem;'>Resend</button>";
-        }
-
-        $html .= "
-                <button type='submit' name='SUBMIT' value='REGISTER'>Register</button>
-            </div>";
-        $html .= wp_nonce_field($action_name='sjd_subscribe_submit',$name=NONCE_NAME,$referrer=true,$display=false);
-        $html .= "
-            </form>
-            <h2>We respect your privacy</h2>
-            <p>Please note that as per our privacy policy your data will NOT be shared with or sold to third-parties and will be used solely to keep you up to data with our news.</p>";
-
-        return $html;
+    <?php 
     }
 
 
@@ -214,14 +200,13 @@ class SJD_ShortCode {
             $subscriber->post_title, // This is their email
             $subscriber->validation_key
         );
-        if ( is_wp_error( $status ) ){
-            return "<p>There was an error sending your email</p>";
+        if ( !is_wp_error( $status) ){
+            echo "<h2>Nearly there $subscriber->first_name!</h2>";
+            echo "<p>We've sent you an email to $subscriber->post_title - please click on the link inside to confirm your subscription.</p>";
+            echo "<p>If you don't receive the message in the next few minutes please check your spam folder.</p>";
+            $send_email = str_replace('@', ' AT ', SMTP_USER);
+            echo "<p>You can help by adding the email address <strong>'$send_email'</strong> to your address book. Replace the ' AT ' with the usual '@'.</p>";
         }
-        $send_email = str_replace('@', ' AT ', SMTP_USER);
-        return "<h2>Nearly there $subscriber->first_name!</h2>
-            <p>We've sent you an email to $subscriber->post_title - please click on the link inside to confirm your subscription.</p>
-            <p>If you don't receive the message in the next few minutes please check your spam folder.</p>
-            <p>You can help by adding the email address <strong>$send_email</strong> to your address book. Replace the ' AT ' with the usual '@'.</p>";
     }
 
     private static function resend_form(){ ?>
@@ -229,7 +214,7 @@ class SJD_ShortCode {
             <p>
                 <button type="submit" name="SUBMIT" id="SUBMIT" value="RESEND">Resend link</button> 
             </p>   
-            <?php wp_nonce_field('sjd_subscribe_submit',NONCE_NAME); ?>      
+            <?php wp_nonce_field('sjd_subscribe_submit','_sjd_subscribe_nonce'); ?>      
         </form>
     <?php }
 

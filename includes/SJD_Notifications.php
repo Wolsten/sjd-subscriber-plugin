@@ -23,7 +23,8 @@ function onMailError( $wp_error ) {
     // SMTP Error: The following recipients failed: leaversofburnley@gmail.com: Requested mail action not taken: mailbox unavailable
     // Mail send limit exceeded.
     echo "</pre>";
-}  
+}
+
 
 
 class SJD_Notifications {
@@ -90,27 +91,27 @@ class SJD_Notifications {
     }
 
 
-    public static function send_subscribe_email( $subscriber_id, $first_name, $email, $validation_key){
+    public static function send_subscribe_email( $subscriber_id, $first_name, $to, $validation_key){
 
         $domain = get_bloginfo('url');
         $url = get_option('subscriber_url');
         $name = get_bloginfo('name');
         $subject = "Confirm your subscription to $name";
         $headers = array("Content-Type: text/html; charset=UTF-8");
-        $link = "$url?validate&email=$email&key=$validation_key";
+        $link = "$url?validate&email=$to&key=$validation_key";
         $img = self::image('');
 
-        $html = file_get_contents(  SJD_SUBSCRIBE_TEMPLATES_PATH . 'request_subscription_template.html');
+        $message = file_get_contents(  SJD_SUBSCRIBE_TEMPLATES_PATH . 'request_subscription_template.html');
 
-        $html = str_replace( '$name', $name, $html);
-        $html = str_replace( '$img', $img, $html);
-        $html = str_replace( '$style',self::style(), $html);
-        $html = str_replace( '$logo', self::logo(), $html);
-        $html = str_replace( '$first_name',$first_name, $html);
-        $html = str_replace( '$link',$link, $html);
-        $html = str_replace( '$domain',get_bloginfo('url'), $html);
+        $message = str_replace( '$name', $name, $message);
+        $message = str_replace( '$img', $img, $message);
+        $message = str_replace( '$style',self::style(), $message);
+        $message = str_replace( '$logo', self::logo(), $message);
+        $message = str_replace( '$first_name',$first_name, $message);
+        $message = str_replace( '$link',$link, $message);
+        $message = str_replace( '$domain',get_bloginfo('url'), $message);
 
-        return wp_mail( $email, $subject, $html, $headers);
+        return wp_mail( $to, $subject, $message, $headers);
     }
 
 
@@ -178,7 +179,8 @@ class SJD_Notifications {
     public static function get_notification_message($post, $what){
         $img = self::image($post);
         $message = '';
-        $from = get_bloginfo('name');
+        // $from = get_bloginfo('name');
+        $from = $post->post_title;
         $name = $post->post_title;
         $domain = get_bloginfo('url');
         $url = "$domain/$post->post_name";

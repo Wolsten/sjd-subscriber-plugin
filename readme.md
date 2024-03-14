@@ -11,6 +11,10 @@ and then Activate as normal.
 
 Create a page for managing subscriptions which has the `[sjd_subscribe_form]`.
 
+### IMPORTANT
+
+Ensure that the site `wp-config.php` file has the required constants defined, e.g. `SMTP_HOST` before the definition of ABSPATH. For a full list of required constants refer to `includes/SJD_email.php`.
+
 ## Settings
 
 A Subscriber Settings page is provided and accessible from the main Dashboard menu.
