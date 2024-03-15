@@ -27,8 +27,8 @@ function sjd_subscribe_init(){
 }
 
 
-//Add Subscriber Tools menu to the standard admin Tools menu
-// add_action( 'admin_menu', 'sjd_subscriber_tools_admin_menu' );
+// Add Subscriber Tools menu to the standard admin Tools menu
+add_action( 'admin_menu', 'sjd_subscriber_tools_admin_menu' );
 function sjd_subscriber_tools_admin_menu(){
     add_management_page( 'Subscriber Tools', 'Subscriber Tools', 'administrator', 'sjd_subscriber_tools', 'sjd_subscriber_tools_do_page' );
 }
@@ -65,7 +65,7 @@ function sjd_subscriber_tools_do_page(){ ?>
 
 
 // Add send notifications button to post edit pages
-//add_action('post_submitbox_start','sjd_post_notify_button');
+add_action('post_submitbox_start','sjd_post_notify_button');
 function sjd_post_notify_button(){
 
     // Check for subscriber url
@@ -79,7 +79,10 @@ function sjd_post_notify_button(){
     // Add notification functionality to the meta publish box
     global $post;
     if ( $post->post_status !== 'publish' ) return;
-    if ( $post->post_type === SJD_Subscriber::POST_TYPE ) return; ?>
+    if ( $post->post_type === SJD_Subscriber::POST_TYPE ) return;
+    ?>
+
+
     <style>
         .sjd-post-notify {
             margin:1.5rem 0;
@@ -111,7 +114,7 @@ function sjd_post_notify_button(){
 
 
 // On post save check for sending notifications
-// add_action('save_post', 'sjd_post_notify_subscribers');
+add_action('save_post', 'sjd_post_notify_subscribers');
 function sjd_post_notify_subscribers(){
     global $post;
         if ( $post ) {

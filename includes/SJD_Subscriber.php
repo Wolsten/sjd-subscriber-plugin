@@ -229,7 +229,8 @@ class SJD_Subscriber {
         $subscribers = get_posts(array(
             'numberposts' => -1,
             'post_type' => self::POST_TYPE,
-            'post_status' => array('publish', 'draft', 'private')
+            'post_status' => array('private')
+            // 'post_status' => array('publish', 'draft', 'private')
         ));
         foreach( $subscribers as $subscriber ){
             $subscriber->first_name = get_post_meta( $subscriber->ID, self::POST_PREFIX.'_first_name', $single=true);
