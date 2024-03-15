@@ -86,9 +86,13 @@ class SJD_Notifications {
                 }
             }
         }
+        $style = '';
+        if ( $bad > 0 ){
+            $style = "style='color:red;font-weight:bold;'";
+        }
         $html .=  "
             </ol>
-            <p>Tried to send $i emails: $good succeeded, $bad failed.</p>
+            <p>Tried to send $i emails: $good succeeded, <span $style>$bad failed</span>.</p>
         </div>";
 
         return $html;
