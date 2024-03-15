@@ -85,8 +85,8 @@ class SJD_Subscriber {
 
     public static function add_single_post_meta_boxes($post_type){
         if ( $post_type==='post' ) {
-            self::$notify_subscribers = '-1';
-            self::$min_list_number = '-1';
+            self::$notify_subscribers = '';
+            self::$min_list_number = 0;
             add_meta_box(
                 $html_id="sjd-notify-subscribers",
                 $title="Notify subscribers on save?",
@@ -104,6 +104,15 @@ class SJD_Subscriber {
                 $context='normal', 
                 $priority='high',
                 $callback_args=array( "sjd-min-list-number" )
+            );
+            add_meta_box(
+                $html_id="sjd-notification-feedback",
+                $title="Notification feedback",
+                $display_callback=Array('SJD_Subscriber','display_single_post_meta_box'),
+                $screen=null, 
+                $context='normal', 
+                $priority='high',
+                $callback_args=array( "sjd-notification-feedback" )
             );
         }
     }
@@ -131,6 +140,9 @@ class SJD_Subscriber {
                 <label for="sjd-min-list-number">Start from subscriber no.</label>
                 <input type="number" name="sjd-min-list-number" id="sjd-min-list-number" 
                         value="1" min="1" max="1000"/>';
+        } else if ( $field === "sjd-notification-feedback" ){
+            $value = get_post_meta( $post->ID, "sjd-notification-feedback", true );
+            echo '<div>' . $value . '</div>';
         }
     }
 
@@ -156,20 +168,20 @@ class SJD_Subscriber {
         }
         $post_type=get_post_type($post_id);
         if ( $post_type==='post' ) {
+
             if ( array_key_exists( 'sjd-notify-subscribers', $_POST ) ){
                 self::$notify_subscribers = $_POST['sjd-notify-subscribers'];
-            } else if ( array_key_exists( 'sjd-min-list-number', $_POST ) ) {
-                self::$min_list_number = $_POST['sjd-min-list-number'];
             }
-        }
+            if ( array_key_exists( 'sjd-min-list-number', $_POST ) ) {
+                self::$min_list_number = intval($_POST['sjd-min-list-number']);
+            }
 
-        if ( self::$notify_subscribers !== '-1' &&
-             self::$min_list_number !== '-1' ){
             // checking whether to send notifications
             if ( self::$notify_subscribers == 'LINK' || 
                  self::$notify_subscribers == 'PAGE') {
-                SJD_Notifications::send($post_id, self::$notify_subscribers, self::$min_list_number);
-                die();
+
+                $html = SJD_Notifications::send($post_id, self::$notify_subscribers, self::$min_list_number);
+                update_post_meta( $post_id, 'sjd-notification-feedback', $html );
             }
         }
     }
