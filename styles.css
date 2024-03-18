@@ -58,3 +58,14 @@
         margin: 0;
     }
 }
+
+
+/* Admin pages */
+
+.wp-toolbar {
+
+    #sjd-notify-subscribers.postbox{
+        background-color:rgb(224, 220, 201);
+    }
+
+}

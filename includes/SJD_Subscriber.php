@@ -30,8 +30,6 @@ class SJD_Subscriber {
 
     public const POST_TYPE = 'subscribers'; // Custom post type
     public const POST_PREFIX = 'subscriber';  // Prefix for custom fields
-    static $notify_subscribers;
-    static $min_list_number;
 
     // Declare the custom fields. Email is stored as the post_title, NOT as a custom field
     // Must declare field to support validation
@@ -57,9 +55,8 @@ class SJD_Subscriber {
             'supports' => array('title', 'editor')
         ));
         add_action('add_meta_boxes', 'SJD_Subscriber::add_subscriber_meta_boxes', 10, 1 );
-        add_action('add_meta_boxes', 'SJD_Subscriber::add_single_post_meta_boxes', 10, 1 );
+        add_action('add_meta_boxes', 'SJD_Subscriber::add_single_post_meta_box', 10, 1 );
         add_action('save_post', 'SJD_Subscriber::save_meta_data' );
-        add_action('save_post', 'SJD_Subscriber::send_notifications' );
         add_filter('manage_'.self::POST_TYPE.'_posts_columns', 'SJD_Subscriber::admin_columns', 10, 1 );
         add_filter('manage_posts_custom_column',  'SJD_Subscriber::admin_column', 10, 2);
     }
@@ -83,10 +80,8 @@ class SJD_Subscriber {
         }
     }
 
-    public static function add_single_post_meta_boxes($post_type){
+    public static function add_single_post_meta_box($post_type){
         if ( $post_type==='post' ) {
-            self::$notify_subscribers = '';
-            self::$min_list_number = 0;
             add_meta_box(
                 $html_id="sjd-notify-subscribers",
                 $title="Notify subscribers on save?",
@@ -95,24 +90,6 @@ class SJD_Subscriber {
                 $context='normal', 
                 $priority='high',
                 $callback_args=array( "sjd-notify-subscribers" )
-            );
-            add_meta_box(
-                $html_id="sjd-min-list-number",
-                $title="Subscriber start (DEBUGGING ONLY)",
-                $display_callback=Array('SJD_Subscriber','display_single_post_meta_box'),
-                $screen=null, 
-                $context='normal', 
-                $priority='high',
-                $callback_args=array( "sjd-min-list-number" )
-            );
-            add_meta_box(
-                $html_id="sjd-notification-feedback",
-                $title="Notification feedback",
-                $display_callback=Array('SJD_Subscriber','display_single_post_meta_box'),
-                $screen=null, 
-                $context='normal', 
-                $priority='high',
-                $callback_args=array( "sjd-notification-feedback" )
             );
         }
     }
@@ -125,25 +102,30 @@ class SJD_Subscriber {
         echo "&nbsp;<input type='".$field['type']."' id='$id' name='$id' value='$value' size='50' />";
     }
 
+
     public static function display_single_post_meta_box( $post, $args){
-        $field = $args['args'][0];
-        if ( $field === "sjd-notify-subscribers" ){
-            echo '
-                <label for="sjd-notify-subscribers">Notify subscribers on save?</label>
-                <select name="sjd-notify-subscribers" id="sjd-notify-subscribers">
-                    <option value="false">Do not notify</option>
-                    <option value="LINK">Send links</option>
-                    <option value="PAGE">Send full page</option>
-                </select>';
-        } else if ( $field === "sjd-min-list-number" ){
-            echo '
-                <label for="sjd-min-list-number">Start from subscriber no.</label>
-                <input type="number" name="sjd-min-list-number" id="sjd-min-list-number" 
-                        value="1" min="1" max="1000"/>';
-        } else if ( $field === "sjd-notification-feedback" ){
-            $value = get_post_meta( $post->ID, "sjd-notification-feedback", true );
-            echo '<div>' . $value . '</div>';
+        $value = get_post_meta( $post->ID, "sjd-notification-feedback", true );
+        delete_post_meta( $post->ID, "sjd-notification-feedback" );
+        $html = '';
+        if ( has_blocks($post->ID) ){
+            $html .= '<p>If using the blocks editor the page will need to be refreshed,
+            i.e. reloaded to display the result of sending any notifications. This only needs doing once as the feedback will be cleared the next time the page is refreshed.</p>';
         }
+        if ( get_user_by( 'email', 'steve.davison@mimica.co.uk') === true ){
+            $html .= "
+                <label for='sjd-min-list-number'>Start from subscriber no.</label>
+                <input type='number' name='sjd-min-list-number' id='sjd-min-list-number' value='1' min='1' max='1000'/>";
+        }
+        echo "
+            <label for='sjd-notify-subscribers'>Notify subscribers on save?</label>
+            <select name='sjd-notify-subscribers' id='sjd-notify-subscribers'>
+                <option value='false'>Do not notify</option>
+                <option value='LINK'>Send links</option>
+                <option value='PAGE'>Send full page</option>
+            </select>
+            <p>If you send notifications and errors are reported - please let Steve know. Do not try resending as this will lead to some subscribers getting multiple messages. Note the number of the first subscriber to fail and Steve will attempt to get it working again:-)</p>
+            $html
+            <div>$value</div>";
     }
 
     public static function save_meta_data( $post_id ) {
@@ -159,30 +141,27 @@ class SJD_Subscriber {
                     update_post_meta( $post_id, $id, $data );
                 }
             }
+        } else if ( $post_type==='post' ) {
+            self::send_notifications( $post_id );
         }
     }
 
     public static function send_notifications( $post_id ) {
-        if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE ){
-            return;
+        $notify_subscribers = '';
+        $min_list_number = 1;
+        if ( array_key_exists( 'sjd-notify-subscribers', $_POST ) ){
+            $notify_subscribers = $_POST['sjd-notify-subscribers'];
         }
-        $post_type=get_post_type($post_id);
-        if ( $post_type==='post' ) {
-
-            if ( array_key_exists( 'sjd-notify-subscribers', $_POST ) ){
-                self::$notify_subscribers = $_POST['sjd-notify-subscribers'];
-            }
-            if ( array_key_exists( 'sjd-min-list-number', $_POST ) ) {
-                self::$min_list_number = intval($_POST['sjd-min-list-number']);
-            }
-
-            // checking whether to send notifications
-            if ( self::$notify_subscribers == 'LINK' || 
-                 self::$notify_subscribers == 'PAGE') {
-
-                $html = SJD_Notifications::send($post_id, self::$notify_subscribers, self::$min_list_number);
+        if ( array_key_exists( 'sjd-min-list-number', $_POST ) ) {
+            $min_list_number = intval($_POST['sjd-min-list-number']);
+        }
+        // checking whether to send notifications
+        if ( $notify_subscribers == 'LINK' || $notify_subscribers == 'PAGE') {
+            $html = SJD_Notifications::send($post_id, $notify_subscribers, $min_list_number);
+            // $html = "Testing...";
+            $html = "Sending with sjd-notify-subscribers set to: <strong>$notify_subscribers</strong>
+                    <div>$html</div>";
                 update_post_meta( $post_id, 'sjd-notification-feedback', $html );
-            }
         }
     }
 

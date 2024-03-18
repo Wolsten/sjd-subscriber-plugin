@@ -1,7 +1,8 @@
 <?php
 /**
  * Plugin Name: SJD Subscribe
- * Version: 0.0.10
+ * Version: 0.11
+ * Modified: 19 March 2024
  * Author: Steve Davison
  * Description: Provide simple subscription solution to register subscribers and manage 
  * email notifications for when new content is added
@@ -20,6 +21,7 @@ REQUIRE_ONCE (SJD_SUBSCRIBE_PLUGIN_PATH . 'includes/SJD_Settings.php');
 
 add_action( 'init', 'sjd_subscribe_init');
 function sjd_subscribe_init(){
+    // wp_enqueue_script('test', plugins_url("includes/test.js", __FILE__));
     wp_enqueue_style('sjd_subscribe_form', plugins_url("styles.css", __FILE__), [], SJD_SUBSCRIBE_VERSION);
     add_shortcode('sjd_subscribe_form', 'SJD_ShortCode::init');
     SJD_Subscriber::init();
