@@ -1,6 +1,6 @@
 <?php
 /**
- * Plugin Name: SJD Subscribe
+ * Plugin Name: SJD Subscriber
  * Version: 0.11
  * Modified: 19 March 2024
  * Author: Steve Davison
