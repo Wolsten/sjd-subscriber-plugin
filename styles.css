@@ -1,5 +1,6 @@
 #sjd-subscribe {
 
+    --input-border-colour: hsl(0, 6%, 73%);
     --warning-colour-background: hsl(0, 31%, 90%);
     --warning-colour-text: hsl(0, 31%, 50%);
     --button-colour-background: hsl(118, 39%, 85%);
@@ -30,7 +31,7 @@
         height: 2rem;
         padding:0.2rem 0.4rem;
         font-size: 1rem;
-        border:none;
+        border:1px solid var(--input-border-colour);
     }
     
     & input.error {
@@ -50,8 +51,8 @@
         display: block;
         float: right;
         cursor: pointer;
-        border:none;
-        background-color: var(--button-colour-background);
+        border:1px solid var(--input-border-colour);
+        /* background-color: var(--button-colour-background); */
     }
 
     .sjd-form-advice {
