@@ -41,12 +41,16 @@ class SJD_Subscriber {
         array("name"=>"validation_key", "title"=>"Validation key", "type"=>"text", "required"=>false),
     );
 
+
     public static function init(){
+        $user = wp_get_current_user();
+        $allowed_roles = array('editor', 'administrator');
+        $show_in_admin = array_intersect($allowed_roles, $user->roles );
         register_post_type(self::POST_TYPE, array(
             'label' => ucfirst(self::POST_TYPE),
             'singular_label' => ucfirst(self::POST_PREFIX),
             'public' => false,
-            'show_ui' => true, // UI in admin panel
+            'show_ui' => $show_in_admin, // UI in admin panel
             'show_in_menu' => true,
             'menu_icon' => 'dashicons-share',
             'capability_type' => 'post',
@@ -54,11 +58,13 @@ class SJD_Subscriber {
             'rewrite' => array("slug" => self::POST_PREFIX), // Permalinks format
             'supports' => array('title', 'editor')
         ));
-        add_action('add_meta_boxes', 'SJD_Subscriber::add_subscriber_meta_boxes', 10, 1 );
-        add_action('add_meta_boxes', 'SJD_Subscriber::add_single_post_meta_box', 10, 1 );
-        add_action('save_post', 'SJD_Subscriber::save_meta_data' );
-        add_filter('manage_'.self::POST_TYPE.'_posts_columns', 'SJD_Subscriber::admin_columns', 10, 1 );
-        add_filter('manage_posts_custom_column',  'SJD_Subscriber::admin_column', 10, 2);
+        if( $show_in_admin  ) {
+            add_action('add_meta_boxes', 'SJD_Subscriber::add_subscriber_meta_boxes', 10, 1 );
+            add_action('add_meta_boxes', 'SJD_Subscriber::add_single_post_meta_box', 10, 1 );
+            add_action('save_post', 'SJD_Subscriber::save_meta_data' );
+            add_filter('manage_'.self::POST_TYPE.'_posts_columns', 'SJD_Subscriber::admin_columns', 10, 1 );
+            add_filter('manage_posts_custom_column',  'SJD_Subscriber::admin_column', 10, 2);
+        }
     }
 
     // Add edit boxes for custom data to the subscriber post type
@@ -159,7 +165,7 @@ class SJD_Subscriber {
         if ( $notify_subscribers == 'LINK' || $notify_subscribers == 'PAGE') {
             $html = SJD_Notifications::send($post_id, $notify_subscribers, $min_list_number);
             // $html = "Testing...";
-            $html = "Sending with sjd-notify-subscribers set to: <strong>$notify_subscribers</strong>
+            $html = "Sending: <strong>$notify_subscribers</strong>s
                     <div>$html</div>";
                 update_post_meta( $post_id, 'sjd-notification-feedback', $html );
         }

@@ -34,6 +34,9 @@ class SJD_Notifications {
 
 
     public static function send($post_id, $what, $min){
+        $user = wp_get_current_user();
+        $allowed_roles = array('editor', 'administrator');
+        $allowed = array_intersect($allowed_roles, $user->roles );
         $post = get_post($post_id);
         $html = "
             <div>
@@ -70,7 +73,11 @@ class SJD_Notifications {
             } else {
                 $email=$subscriber->post_title;
             }
-            $entry = "[$subscriber->ID] $subscriber->first_name $subscriber->last_name ($email)";
+            if ( $allowed ){
+                $entry = "[$subscriber->ID] $subscriber->first_name $subscriber->last_name ($email)";
+            } else {
+                $entry = "[$subscriber->ID] $subscriber->first_name $subscriber->last_name";
+            }
             if ( $i < $min ){
                 $skipped ++;
                 $html .= "<li>$entry - SKIPPED</li>";
@@ -79,7 +86,9 @@ class SJD_Notifications {
                 $status = self::send_notification_email($message, $subscriber->ID, $subscriber->first_name, $email, $post, $what);
                 if ( $status ){
                     $good ++;
-                    $html .= "<li style='color:green;'>$entry - SENT</li>";
+                    if ( $allowed ){
+                        $html .= "<li style='color:green;'>$entry - SENT</li>";
+                    }
                 } else {
                     $bad ++;
                     $html .= "<li style='color:red;'>$entry - FAILED!</li>";
