@@ -1,14 +1,14 @@
 <?php
 /**
  * Plugin Name: SJD Subscriber
- * Version: 0.12
- * Modified: 25 Sep 2024
+ * Version: 0.13
+ * Modified: 2 Oct2024
  * Author: Steve Davison
  * Description: Provide simple subscription solution to register subscribers and manage 
  * email notifications for when new content is added. 
  */
 
-DEFINE( "SJD_SUBSCRIBE_VERSION", '0.0.11');
+DEFINE( "SJD_SUBSCRIBE_VERSION", '0.0.13');
 DEFINE( "SJD_SUBSCRIBE_IMAGE", plugins_url('/sjd-subscriber-plugin/images/email.jpg'));
 DEFINE( 'SJD_SUBSCRIBE_PLUGIN_PATH', plugin_dir_path( __FILE__ ) );
 DEFINE( 'SJD_SUBSCRIBE_TEMPLATES_PATH', SJD_SUBSCRIBE_PLUGIN_PATH . 'templates/' );
