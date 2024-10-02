@@ -38,22 +38,9 @@ class SJD_Notifications {
         $allowed_roles = array('editor', 'administrator');
         $allowed = array_intersect($allowed_roles, $user->roles );
         $post = get_post($post_id);
-        $html = "
-            <div>
-                <p>Sending $what notification emails for this post.</p>";
-        // Check for shortcodes in the content
-        if ( $what=='PAGE' ){
-            $regex = '/^\[.{5,}\]/m';
-            $str = $post->post_content;
-            if ( preg_match($regex, $str)==1 ){
-                $html .= "
-                        <p>Could not send this content because it looks like it contains at least one shortcode, e.g. [name ....].</p>
-                        <p>You cannot send page content with embedded shortcodes as they may generate dynamic content that is not available except via the web page but you can send as a link instead.</p>
-                        <a href='/wp-admin/post.php?post=$post->ID&action=edit'>Back to post</a>
-                    </div>";
-                return $html;
-            }
-        }
+        $html = "<div>
+                    <p>Sending $what notification emails for this post.</p>";
+
         // Construct the generic part of the notification
         $message = self::get_notification_message($post, $what);
         // Get all subscribers
@@ -105,65 +92,6 @@ class SJD_Notifications {
         </div>";
 
         return $html;
-    }
-
-
-
-    public static function sendOLD($post_id, $what, $min){
-        $post = get_post($post_id);
-        echo "<div style='margin:2rem;'>";
-        echo "<h1>Sending notifications</h1>";
-        echo "<p>Sending $what notification emails for post [$post_id] <strong>$post->post_title</strong></p>";
-        // Check for shortcodes in the content
-        if ( $what=='PAGE' ){
-            $regex = '/^\[.{5,}\]/m';
-            $str = $post->post_content;
-            if ( preg_match($regex, $str)==1 ){
-                echo "<p>Could not send this content because it looks like it contains at least one shortcode, e.g. [name ....].</p>";
-                echo "<p>You cannot send page content with embedded shortcodes as they may generate dynamic content that is not available except via the web page but you can send as a link instead.</p>";
-                echo "<a href='/wp-admin/post.php?post=$post->ID&action=edit'>Back to post</a>";
-                echo "</div>";
-                return;
-            }
-        }
-        // Construct the generic part of the notification
-        $message = self::get_notification_message($post, $what);
-        // Get all subscribers
-        $subscribers = SJD_Subscriber::all();
-        $i = 0;
-        $skipped = 0;
-        $good = 0;
-        $bad = 0;
-        $stop_on_first_fail = (bool) get_option('subscriber_stop_on_first_fail')=='1';
-        echo "<p>Sending emails, skipping those below $min.</p>";
-        echo "<ol>";
-        foreach( $subscribers as $subscriber ){
-            $i++;
-            if ( self::DEBUG_EMAIL != "" ){
-                $email = self::DEBUG_EMAIL;
-            } else {
-                $email=$subscriber->post_title;
-            }
-            $entry = "[$subscriber->ID] $subscriber->first_name $subscriber->last_name ($email)";
-            if ( $i < $min ){
-                $skipped ++;
-                echo "<li>$entry - SKIPPED</li>";
-            } else if ($bad==0 || $stop_on_first_fail==false ) {
-
-                $status = self::send_notification_email($message, $subscriber->ID, $subscriber->first_name, $email, $post, $what);
-                if ( $status ){
-                    $good ++;
-                    echo "<li style='color:green;'>$entry - SENT</li>";
-                } else {
-                    $bad ++;
-                    echo "<li style='color:red;'>$entry - FAILED!</li>";
-                }
-            }
-        }
-        echo "</ol>";// 
-        echo "<p>Tried to send $i emails: $good succeeded, $bad failed.</p>";
-        echo "<a href='/wp-admin/post.php?post=$post->ID&action=edit'>Back to post</a>";
-        echo "</div>";
     }
 
 
@@ -260,11 +188,14 @@ class SJD_Notifications {
         $domain = get_bloginfo('url');
         $url = "$domain/$post->post_name";
         if ( $what === 'PAGE' ){
-            $content = self::format($post->post_content);
+            // Expand shortcodes
+            $content = do_shortcode($post->post_content);
+            $content = self::format($content);
             $message ="<p class='excerpt'>$post->post_excerpt</p>$content";
         } else {
+            $excerpt = get_the_excerpt($post);
             $message = 
-                "<p>$post->post_excerpt</p>
+                "<p>$excerpt</p>
                  <p><a href='$url'>Click here to find out more</a>.</p>";
         }
 
