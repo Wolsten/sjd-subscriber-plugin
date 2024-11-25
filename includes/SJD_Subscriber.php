@@ -181,6 +181,7 @@ class SJD_Subscriber {
             $test = strtoupper($value);
             if ( substr_count( $test, ' ') > 2 ||
                  str_contains( $test, 'WWW') || 
+                 str_contains( $test, 'HTTP') || 
                  str_contains( $test, '%') ){
                 $value = '';
             }
