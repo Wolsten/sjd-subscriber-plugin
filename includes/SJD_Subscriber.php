@@ -172,8 +172,18 @@ class SJD_Subscriber {
     }
 
     public static function sanitise_field($name,$value){
+        // print_r($name);
+        // echo '<br/>';
         if ( $name == 'email' ){
             return sanitize_email( $value );
+        }
+        if ( $name == 'first_name' || $name == 'last_name' || $name == 'location') {
+            $test = strtoupper($value);
+            if ( substr_count( $test, ' ') > 2 ||
+                 str_contains( $test, 'WWW') || 
+                 str_contains( $test, '%') ){
+                $value = '';
+            }
         }
         return sanitize_text_field( $value );
     }
@@ -184,7 +194,7 @@ class SJD_Subscriber {
         $status = true;
         foreach( self::CUSTOM_FIELDS as $field ){
             if ( isset($inputs[$field['name']])){
-                $clean[$field['name']] = self::sanitise_field($field,$inputs[$field['name']]);
+                $clean[$field['name']] = self::sanitise_field($field['name'],$inputs[$field['name']]);
                 $errors[$field['name']] = '';
                 if ( $field['required'] && $clean[$field['name']] == ''){
                     $errors[$field['name']] = "This value is required";
