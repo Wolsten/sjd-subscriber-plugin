@@ -171,17 +171,27 @@ class SJD_Subscriber {
         }
     }
 
+    private static function detectUrls($inputString) {
+        // Regular expression to match URLs
+        $urlPattern = '/\b(?:https?:\/\/)?(?:www\.)?[a-zA-Z0-9\-]+\.[a-zA-Z]{2,}(?:\/\S*)?\b/';
+    
+        // Use preg_match_all to find all URLs in the string
+        preg_match_all($urlPattern, $inputString, $matches);
+
+        // print_r('<br/>input string='.$inputString.' - length of matches='.count($matches[0]));
+    
+        // Return the array of matched URLs
+        return count($matches[0]) > 0;
+    }
+
     public static function sanitise_field($name,$value){
-        // print_r($name);
-        // echo '<br/>';
         if ( $name == 'email' ){
             return sanitize_email( $value );
         }
         if ( $name == 'first_name' || $name == 'last_name' || $name == 'location') {
             $test = strtoupper($value);
             if ( substr_count( $test, ' ') > 2 ||
-                 str_contains( $test, 'WWW') || 
-                 str_contains( $test, 'HTTP') || 
+                 SJD_Subscriber::detectUrls( $test ) ||
                  str_contains( $test, '%') ){
                 $value = '';
             }
